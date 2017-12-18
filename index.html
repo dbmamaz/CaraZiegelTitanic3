@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+  <h2 > Titanic Passenger Deaths and Survivors by Ticket Class </h2>
+    <script type="text/javascript">
+    	 function draw(data) {
+
+      /*
+        D3.js setup code
+      */
+
+          "use strict";
+          var margin = 100,
+              width = 900 - margin,
+              height = 400 - margin;
+
+          var svg = d3.select("body")
+            .append("svg")
+              .attr("width", width + margin)
+              .attr("height", height + margin)
+            .append('g')
+                .attr('class','chart');
+
+      /* this loops through the data and changes
+        2 fields from numerical to text, to make the
+        chart make more sense */
+
+      data.forEach(function(d) {
+
+            var firstClassTotal = 0;
+            var secondClassTotal = 0;
+            var thirdClassTotal = 0;
+
+
+            d['Survived'] = +d['Survived'];
+
+            if (d['Survived'] === 0){
+                d['SurvivalStatus'] = 'Deaths';
+            }else{
+                d['SurvivalStatus'] = 'Survivors';}
+
+            d['Pclass'] = +d['Pclass'];
+
+            if (d['Pclass'] === 1){
+                d['TicketClass'] = 'First Class';
+                firstClassTotal += 1;
+            } else if (d['Pclass'] === 2){
+                d['TicketClass'] = 'Second Class';
+                secondClassTotal += 1;
+            } else{
+                d['TicketClass'] = 'Third Class';}
+                thirdClassTotal += 1;
+
+            d['Count'] = d['Name']
+        });
+
+
+      /*
+        Dimple.js Chart construction code
+        reversed order of the x axis and
+        added a legend
+      */
+
+          var myChart = new dimple.chart(svg, data);
+          var x = myChart.addCategoryAxis("x", ["TicketClass", "SurvivalStatus"]);
+          x.addOrderRule("TicketClass", false);
+          var y = myChart.addMeasureAxis("y", "Count");
+          var s = myChart.addSeries("SurvivalStatus", dimple.plot.bar);
+          s.addOrderRule( [ "Deaths", "Survivors" ] );
+          myChart.addLegend(65, 10, 450, 20, "right");
+          myChart.draw();
+
+        /* after the chart is drawn, axis titles can
+        be changed */
+        x.titleShape.text("Survival by Ticket Class");
+        y.titleShape.text("Count of Passengers");
+
+            };
+      </script>
+  </head>
+
+  <body>
+  <script type="text/javascript">
+  /*
+    Use D3 (not dimple.js) to load the TSV file
+    and pass the contents of it to the draw function
+    */
+  d3.csv("titanic-data.csv", draw);
+  </script>
+</body>
+</html>
